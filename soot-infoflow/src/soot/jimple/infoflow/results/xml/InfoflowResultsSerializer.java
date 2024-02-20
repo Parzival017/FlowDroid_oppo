@@ -214,6 +214,27 @@ public class InfoflowResultsSerializer {
 				writer.writeAttribute(XmlConstants.Attributes.methodSourceSinkDefinition, ms.getMethod().getSignature());
 		}
 
+		// TODO：如果Source方法是curser的getString，检查其用到的URI
+		SootMethod method = icfg.getMethodOf(source.getStmt());
+		if (method.getDeclaringClass().getName().equals("android.database.Cursor")) {
+			if (method.getName().equals("getString")) {
+				// 寻找getColumIndex的调用
+				SootMethod caller = icfg.getMethodOf(source.getStmt());
+				// 遍历caller的所有语句
+				for (Unit unit : caller.getActiveBody().getUnits()) {
+					// 如果是invoke语句
+					if (unit.toString().contains("invoke")) {
+						// 获取invoke的方法
+						SootMethod invokeMethod = ((Stmt) unit).getInvokeExpr().getMethod();
+						// 如果是getColumnIndex
+						if (invokeMethod.getName().equals("getColumnIndex")) {
+							// TODO：获取URI参数
+						}
+					}
+				}
+			}
+		}
+
 		writeAdditionalSourceInfo(source, writer);
 		writeAccessPath(source.getAccessPath(), writer);
 
